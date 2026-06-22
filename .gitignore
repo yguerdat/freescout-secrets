@@ -1,0 +1,10 @@
+.DS_Store
+**/.DS_Store
+/vendor/
+node_modules/
+*.log
+.env
+
+# Local-only working files (internal infrastructure details, not for publication)
+.claude/
+PLAN.md
