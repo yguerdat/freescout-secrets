@@ -2,6 +2,10 @@
 
 @section('title_full', __('Send a secret'))
 
+@section('sidebar')
+    @include('secrets::partials.sidebar', ['active' => 'create'])
+@endsection
+
 @section('content')
 <div class="section-heading">
     <i class="glyphicon glyphicon-lock"></i> {{ __('Send a secret') }}

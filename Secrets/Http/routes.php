@@ -64,6 +64,10 @@ Route::group([
     Route::get('/app/secrets/settings', ['uses' => 'SecretsController@settings', 'middleware' => ['auth', 'roles'], 'roles' => ['admin']])->name('secrets.settings');
     Route::post('/app/secrets/settings', ['uses' => 'SecretsController@settingsSave', 'middleware' => ['auth', 'roles'], 'roles' => ['admin']]);
 
+    // Agent: manage / audit created secrets.
+    Route::get('/app/secrets/manage', ['uses' => 'SecretsController@manage', 'middleware' => ['auth']])->name('secrets.manage');
+    Route::post('/app/secrets/delete/{token}', ['uses' => 'SecretsController@destroy', 'middleware' => ['auth']])->where('token', '[A-Za-z0-9_-]+')->name('secrets.delete');
+
     // Agent: create an outbound secret.
     Route::get('/app/secrets/create', ['uses' => 'SecretsController@createPage', 'middleware' => ['auth']])->name('secrets.create');
     Route::post('/app/secrets/store-outbound', ['uses' => 'SecretsController@storeOutbound', 'middleware' => ['auth'], 'laroute' => true])->name('secrets.store_outbound');

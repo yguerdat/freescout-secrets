@@ -14,7 +14,9 @@ E-mailing a password is insecure: it lives forever in mailboxes, backups and log
 - Paste a secret → get a link that works for *N* days and *N* views (both configurable).
 - The secret is **encrypted in the browser**. The decryption key lives only in the URL fragment (`#…`), which browsers never send to the server. The server stores an **unreadable blob** — a database dump reveals nothing.
 - Optional **passphrase** for a second factor, deliverable to the customer by **SMS** (via [SMSeagle](https://www.smseagle.eu/)) over a separate channel.
-- Customers can **send secrets to you** through a public form. It opens a support ticket with a **burn-after-read reveal button** — the secret is never written in clear into the ticket or any notification e-mail.
+- Customers can **send secrets to you** through a public form. It opens a support ticket with a **burn-after-read reveal button** — the secret is never written in clear into the ticket or any notification e-mail, and it is destroyed after a configurable number of agent reveals.
+- Generate a secret link **without leaving the reply editor** — a lock button in the conversation toolbar creates the link and inserts it into your message.
+- **Audit and revoke** every secret from a management page: see view counts, status and linked ticket, and destroy any secret on demand.
 
 ## Security model
 
@@ -60,7 +62,11 @@ A **dedicated sub-domain** for the public pages (e.g. `secrets.example.com`) is 
 
 **Send a secret to a customer** — click the 🔒 in the top navbar (*Send a secret*), paste the value, choose expiry/views, optionally set a passphrase (and SMS it), then copy the generated link and send it to the customer.
 
-**Receive a secret from a customer** — share `https://<public-base-url>/secrets/new`. When a customer submits, a ticket opens in the configured mailbox with a *Reveal secret* panel; click it to decrypt the value in your browser.
+**…or straight from the reply** — while writing a reply, click the 🔒 button in the editor toolbar. Create the secret in the dialog and the link is inserted into your message, no context switch.
+
+**Receive a secret from a customer** — share `https://<public-base-url>/secrets/new`. When a customer submits, a ticket opens in the configured mailbox with a *Reveal secret* panel; click it to decrypt the value in your browser. The panel shows how many reveals remain before the secret is destroyed.
+
+**Manage & revoke** — **Manage → Secrets → Sent secrets** lists every secret with its status, view count, expiry and linked ticket. Revoke any of them to destroy the payload immediately. Outbound secrets stay zero-knowledge — the page shows metadata only, never the content.
 
 ## SMS (SMSeagle)
 

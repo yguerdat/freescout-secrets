@@ -63,6 +63,10 @@ class SecretsServiceProvider extends ServiceProvider
         // Reveal panel for inbound secrets linked to a conversation.
         \Eventy::addAction('conversation.before_threads', function ($conversation) {
             try {
+                // Agents only — never expose the reveal panel in a customer portal.
+                if (!auth()->check() || !auth()->user()) {
+                    return;
+                }
                 if (!$conversation || empty($conversation->id)) {
                     return;
                 }
@@ -76,6 +80,18 @@ class SecretsServiceProvider extends ServiceProvider
                 }
             } catch (\Throwable $e) {
                 \Log::error('Secrets: inbound panel failed: ' . $e->getMessage());
+            }
+        });
+
+        // Inject the "insert a secret link" composer into the agent reply UI.
+        \Eventy::addAction('conversation.after_threads', function ($conversation) {
+            try {
+                if (!auth()->check() || !auth()->user()) {
+                    return;
+                }
+                echo view('secrets::partials.compose_modal')->render();
+            } catch (\Throwable $e) {
+                \Log::error('Secrets: compose modal failed: ' . $e->getMessage());
             }
         });
 

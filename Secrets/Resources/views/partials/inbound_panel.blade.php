@@ -6,11 +6,14 @@
      data-t-revealing="{{ __('Revealing…') }}"
      data-t-revealed="{{ __('Revealed. Copy it now — it will not be shown again here.') }}"
      data-t-gone="{{ __('This secret is no longer available (expired or already destroyed).') }}"
-     data-t-wrong="{{ __('Could not decrypt — the passphrase may be wrong.') }}">
+     data-t-wrong="{{ __('Could not decrypt — the passphrase may be wrong.') }}"
+     data-t-views_left="{{ __('reveals left') }}"
+     data-t-burned="{{ __('Destroyed — this secret can no longer be revealed.') }}">
 
     <div class="secrets-inbound-head">
         <i class="glyphicon glyphicon-lock"></i> {{ __('Encrypted secret from the customer') }}
     </div>
+    <p class="secrets-inbound-note text-help">{{ __('Burn-after-read: this secret is destroyed once its reveals are used up. Copy it somewhere safe when you open it.') }}</p>
 
     @foreach($secrets as $secret)
         <div class="secrets-inbound-row">
@@ -27,6 +30,7 @@
                         data-passphrase-protected="{{ $secret->passphrase_protected ? '1' : '0' }}">
                     {{ __('Reveal secret') }}
                 </button>
+                <span class="secrets-inbound-views label label-default">{{ $secret->viewsLeft() }} {{ __('reveals left') }}</span>
                 <span class="secrets-inbound-status text-help"></span>
                 <textarea class="secrets-inbound-output form-control" readonly rows="4"
                           spellcheck="false" style="display:none; margin-top:8px"></textarea>
