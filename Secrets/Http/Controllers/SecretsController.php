@@ -92,7 +92,13 @@ class SecretsController extends Controller
 
     public function manage(Request $request)
     {
-        $secrets = Secret::orderBy('created_at', 'desc')->paginate(50);
+        // Least privilege: agents see only the secrets they created; admins get
+        // the org-wide view (including anonymous customer-submitted inbound ones).
+        $query = Secret::orderBy('created_at', 'desc');
+        if (!auth()->user()->isAdmin()) {
+            $query->where('created_by', auth()->id());
+        }
+        $secrets = $query->paginate(50);
 
         // Resolve author names for outbound secrets in one query.
         $userIds = $secrets->pluck('created_by')->filter()->unique()->values()->all();
@@ -107,11 +113,21 @@ class SecretsController extends Controller
     public function destroy(Request $request, $token)
     {
         $id = preg_replace('/[^A-Za-z0-9\-_]/', '', (string) $token);
-        $secret = Secret::find($id);
-        if ($secret) {
-            $secret->delete();
-            \Session::flash('flash_success_floating', __('Secret revoked and destroyed.'));
+
+        // Ownership check: an agent may only revoke their own secrets; admins
+        // may revoke any. Prevents IDOR revocation of another agent's secret.
+        $query = Secret::where('id', $id);
+        if (!auth()->user()->isAdmin()) {
+            $query->where('created_by', auth()->id());
         }
+        $secret = $query->first();
+
+        if (!$secret) {
+            abort(404);
+        }
+
+        $secret->delete();
+        \Session::flash('flash_success_floating', __('Secret revoked and destroyed.'));
 
         return redirect()->route('secrets.manage');
     }
