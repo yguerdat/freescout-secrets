@@ -43,6 +43,7 @@ class SecretsController extends Controller
             'defaultTtlHours'  => $this->service->defaultTtlHours(),
             'defaultMaxViews'  => $this->service->defaultMaxViews(),
             'inboundEnabled'   => $this->service->inboundEnabled(),
+            'inboundMaxViews'  => $this->service->inboundMaxViews(),
             'inboundMailboxId' => (int) \Option::get('secrets.inbound_mailbox_id'),
             'smsBaseUrl'       => \Option::get('secrets.sms_base_url'),
             'smsModem'         => \Option::get('secrets.sms_modem'),
@@ -71,6 +72,7 @@ class SecretsController extends Controller
         \Option::set('secrets.default_ttl_hours', max(1, (int) $request->input('default_ttl_hours', 168)));
         \Option::set('secrets.default_max_views', max(1, (int) $request->input('default_max_views', 1)));
         \Option::set('secrets.inbound_enabled', $request->has('inbound_enabled'));
+        \Option::set('secrets.inbound_max_views', max(1, (int) $request->input('inbound_max_views', 3)));
         \Option::set('secrets.inbound_mailbox_id', (int) $request->input('inbound_mailbox_id', 0));
 
         \Option::set('secrets.sms_base_url', rtrim(trim((string) $request->input('sms_base_url')), '/'));
@@ -82,6 +84,36 @@ class SecretsController extends Controller
         \Session::flash('flash_success_floating', __('Settings saved.'));
 
         return redirect()->route('secrets.settings');
+    }
+
+    /* ----------------------------------------------------------------- *
+     | Agent: manage / audit created secrets
+     * ----------------------------------------------------------------- */
+
+    public function manage(Request $request)
+    {
+        $secrets = Secret::orderBy('created_at', 'desc')->paginate(50);
+
+        // Resolve author names for outbound secrets in one query.
+        $userIds = $secrets->pluck('created_by')->filter()->unique()->values()->all();
+        $users = $userIds ? \App\User::whereIn('id', $userIds)->get()->keyBy('id') : collect();
+
+        return view('secrets::manage', [
+            'secrets' => $secrets,
+            'users'   => $users,
+        ]);
+    }
+
+    public function destroy(Request $request, $token)
+    {
+        $id = preg_replace('/[^A-Za-z0-9\-_]/', '', (string) $token);
+        $secret = Secret::find($id);
+        if ($secret) {
+            $secret->delete();
+            \Session::flash('flash_success_floating', __('Secret revoked and destroyed.'));
+        }
+
+        return redirect()->route('secrets.manage');
     }
 
     /* ----------------------------------------------------------------- *
@@ -201,6 +233,7 @@ class SecretsController extends Controller
             'iv'                   => $p['iv'],
             'key'                  => rtrim(strtr(base64_encode($key), '+/', '-_'), '='),
             'passphrase_protected' => (bool) $p['passphrase_protected'],
+            'views_left'           => $result['secret']->viewsLeft(),
         ])->header('Cache-Control', 'no-store');
     }
 }

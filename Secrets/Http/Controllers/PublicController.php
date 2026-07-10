@@ -149,7 +149,7 @@ class PublicController extends Controller
             'wrapped_key'          => $data['wrapped_key'],
             'passphrase_protected' => !empty($data['passphrase_protected']),
             'conversation_id'      => $conversation->id,
-            'max_views'            => 1000, // agents may re-open within TTL; burns on expiry
+            'max_views'            => $this->service->inboundMaxViews(), // burn-after-read for agents too
             'ttl_hours'            => $this->service->maxTtlHours(),
             'ip'                   => $request->ip(),
         ]);

@@ -12,6 +12,10 @@ return [
     'default_ttl_hours' => 168,   // 7 days
     'default_max_views' => 1,     // burn after first read
 
+    // How many times an agent may reveal an inbound (customer-submitted) secret
+    // before it is destroyed. Burn-after-read applies here too.
+    'inbound_max_views' => 3,
+
     // Hard ceilings — a secret can never live longer / be opened more than this.
     'max_ttl_hours'  => 720,      // 30 days
     'max_views_cap'  => 100,

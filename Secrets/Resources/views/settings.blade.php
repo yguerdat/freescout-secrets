@@ -3,11 +3,7 @@
 @section('title_full', __('Secrets') . ' - ' . __('Settings'))
 
 @section('sidebar')
-    @include('partials/sidebar_menu_toggle')
-    <div class="sidebar-title">{{ __('Manage') }}</div>
-    <ul class="sidebar-menu">
-        <li class="active"><a href="{{ route('secrets.settings') }}"><i class="glyphicon glyphicon-lock"></i> {{ __('Secrets') }}</a></li>
-    </ul>
+    @include('secrets::partials.sidebar', ['active' => 'settings'])
 @endsection
 
 @section('content')
@@ -99,6 +95,14 @@
                     </div>
                 </div>
                 <p class="form-help">{{ __('Allow customers to send you secrets, which open a ticket with a reveal button.') }}</p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{ __('Reveals before destruction') }}</label>
+            <div class="col-sm-3">
+                <input type="number" name="inbound_max_views" class="form-control" min="1" value="{{ $inboundMaxViews }}">
+                <p class="form-help">{{ __('How many times an agent can reveal a customer-submitted secret before it is destroyed (burn-after-read).') }}</p>
             </div>
         </div>
 

@@ -35,6 +35,11 @@ class SecretService
         return (int) (\Option::get('secrets.default_max_views') ?: config('secrets.default_max_views', 1));
     }
 
+    public function inboundMaxViews(): int
+    {
+        return max(1, (int) (\Option::get('secrets.inbound_max_views') ?: config('secrets.inbound_max_views', 3)));
+    }
+
     public function maxTtlHours(): int
     {
         return (int) config('secrets.max_ttl_hours', 720);

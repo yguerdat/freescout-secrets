@@ -12,6 +12,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title', __('Secure secret')) — {{ $brandName }}</title>
+    <link rel="icon" type="image/png" href="{{ \Module::getPublicPath('secrets') }}/img/icon.png">
+    <link rel="apple-touch-icon" href="{{ \Module::getPublicPath('secrets') }}/img/icon.png">
     <link rel="stylesheet" href="{{ \Module::getPublicPath('secrets') }}/css/secrets.css">
     <style>:root{--secrets-accent: {{ $accent }};}</style>
 </head>
