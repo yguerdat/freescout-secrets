@@ -4,6 +4,15 @@ All notable changes to this module are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] — 2026-07-10
+
+### Security
+- **Management page access control.** The *Sent secrets* page and its revoke
+  action now enforce ownership: an agent sees and can revoke only the secrets
+  they created, while admins retain the org-wide view. Fixes an IDOR where any
+  authenticated agent could revoke another agent's secret, and an information
+  disclosure of all secrets' metadata.
+
 ## [1.1.0] — 2026-07-10
 
 ### Added
