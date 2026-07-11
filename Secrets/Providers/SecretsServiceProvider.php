@@ -83,8 +83,9 @@ class SecretsServiceProvider extends ServiceProvider
             }
         });
 
-        // Inject the "insert a secret link" composer into the agent reply UI.
-        \Eventy::addAction('conversation.after_threads', function ($conversation) {
+        // Inject the "insert a secret link" composer into the agent reply UI
+        // (existing conversation) and into the new-conversation form.
+        $renderComposer = function () {
             try {
                 if (!auth()->check() || !auth()->user()) {
                     return;
@@ -93,7 +94,9 @@ class SecretsServiceProvider extends ServiceProvider
             } catch (\Throwable $e) {
                 \Log::error('Secrets: compose modal failed: ' . $e->getMessage());
             }
-        });
+        };
+        \Eventy::addAction('conversation.after_threads', $renderComposer);
+        \Eventy::addAction('new_conversation_form.after', $renderComposer);
 
         // Trust the dedicated public host (e.g. secrets.example.com) so the
         // reveal page and intake form work on their own sub-domain without

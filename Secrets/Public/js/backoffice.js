@@ -205,8 +205,8 @@
      */
     function initCompose() {
         var cfg = document.getElementById('secrets-compose');
-        if (!cfg || !window.SecretsCrypto || !window.jQuery) { return; }
-        var $ = window.jQuery;
+        var $ = window.jQuery || window.$;
+        if (!cfg || !window.SecretsCrypto || !$) { return; }
 
         var csrf = cfg.getAttribute('data-csrf');
         var iterations = parseInt(cfg.getAttribute('data-iterations'), 10) || 310000;
@@ -214,6 +214,12 @@
         var smsUrl = cfg.getAttribute('data-sms-url');
         var smsConfigured = cfg.getAttribute('data-sms-configured') === '1';
         var btnLabel = cfg.getAttribute('data-btn-label') || 'Insert a secret link';
+        var linkText = cfg.getAttribute('data-link-text') || 'Open the secure link';
+
+        function escapeHtml(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
 
         // Move the modal to <body> so it is never trapped in an overflow container.
         var modal = document.getElementById('secrets-compose-modal');
@@ -241,6 +247,7 @@
         function toggleSms() { if (smsWrap) { smsWrap.style.display = (smsConfigured && passEl.value) ? '' : 'none'; } }
 
         // Inject a toolbar button into each Summernote editor as it appears.
+        // Editors are created/re-created lazily, so we keep watching the DOM.
         function injectButtons() {
             var toolbars = document.querySelectorAll('.note-toolbar');
             Array.prototype.forEach.call(toolbars, function (toolbar) {
@@ -255,23 +262,36 @@
                 var b = document.createElement('button');
                 b.type = 'button';
                 b.className = 'note-btn btn btn-default btn-sm';
+                b.setAttribute('tabindex', '-1');
                 b.title = btnLabel;
                 b.innerHTML = '<i class="glyphicon glyphicon-lock"></i>';
+                // Keep the caret where the agent was typing when they click us.
+                b.addEventListener('mousedown', function (e) { e.preventDefault(); });
                 b.addEventListener('click', function (e) {
                     e.preventDefault();
                     activeTextarea = textarea;
                     pendingHtml = null;
+                    // Remember the current caret position inside the editor.
+                    try { $(textarea).summernote('saveRange'); } catch (err) {}
                     secretEl.value = ''; passEl.value = ''; setStatus('', ''); toggleSms();
                     createBtn.disabled = false;
                     $(modal).modal('show');
                 });
                 group.appendChild(b);
-                toolbar.appendChild(group);
+                // Prepend so the button is always visible at the toolbar's start.
+                if (toolbar.firstChild) { toolbar.insertBefore(group, toolbar.firstChild); }
+                else { toolbar.appendChild(group); }
             });
         }
-        var tries = 0;
-        var poll = setInterval(function () { injectButtons(); if (++tries > 40) { clearInterval(poll); } }, 500);
+
         injectButtons();
+        if (window.MutationObserver) {
+            var obs = new MutationObserver(function () { injectButtons(); });
+            obs.observe(document.body, { childList: true, subtree: true });
+        } else {
+            var tries = 0;
+            var poll = setInterval(function () { injectButtons(); if (++tries > 120) { clearInterval(poll); } }, 500);
+        }
 
         // Insert the link once the modal is fully closed (focus restored).
         $(modal).on('hidden.bs.modal', function () {
@@ -279,6 +299,8 @@
             var html = pendingHtml; pendingHtml = null;
             try {
                 if (activeTextarea && $(activeTextarea).summernote) {
+                    // Restore the caret we saved and insert there (not at the top).
+                    try { $(activeTextarea).summernote('restoreRange'); } catch (e) {}
                     $(activeTextarea).summernote('focus');
                     $(activeTextarea).summernote('pasteHTML', html);
                 } else {
@@ -314,7 +336,9 @@
                     // id/key — no user HTML — so it is safe to insert as markup.
                     var link = res.j.url + '#' + enc.keyB64u;
                     var safe = link.replace(/"/g, '%22');
-                    pendingHtml = ' <a href="' + safe + '">' + link + '</a> ';
+                    // Short, localized, inline anchor text — not the raw URL,
+                    // which wraps and breaks in many mail clients.
+                    pendingHtml = '<a href="' + safe + '">🔒 ' + escapeHtml(linkText) + '</a>';
                     secretEl.value = '';
                     setStatus(t(cfg, 'inserted', 'Secret link inserted into your reply.'), 'is-ok');
                     // Insertion happens on the modal's hidden event (focus restored).
@@ -350,8 +374,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        initCreate();
-        initInboundPanel();
-        initConfirms();
+        // Isolate each initializer so one failing never blocks the others.
+        [initCreate, initInboundPanel, initCompose, initConfirms].forEach(function (fn) {
+            try { fn(); } catch (e) { try { console.error('[secrets] init error', e); } catch (e2) {} }
+        });
     });
 })();

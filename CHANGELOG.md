@@ -4,6 +4,16 @@ All notable changes to this module are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] — 2026-07-11
+
+### Fixed
+- **Reply composer button now actually appears.** Its initializer was defined
+  but never invoked, so the lock button never rendered. It is now wired up and
+  uses a `MutationObserver` to attach to the Summernote toolbar reliably as the
+  editor is (re)created — available both when replying to a conversation and on
+  the new-conversation form. Each front-end initializer is isolated so one
+  failing can't block the others.
+
 ## [1.1.1] — 2026-07-10
 
 ### Security
