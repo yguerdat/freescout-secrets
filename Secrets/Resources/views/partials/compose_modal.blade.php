@@ -7,6 +7,7 @@
      data-iterations="{{ (int) config('secrets.pbkdf2_iterations', 310000) }}"
      data-sms-configured="{{ (new \Modules\Secrets\Services\SmsEagleClient())->isConfigured() ? '1' : '0' }}"
      data-btn-label="{{ __('Insert a secret link') }}"
+     data-link-text="{{ __('Open the secure link') }}"
      data-t-required="{{ __('Enter the secret to share.') }}"
      data-t-encrypting="{{ __('Encrypting…') }}"
      data-t-error="{{ __('Could not create the secret. Please try again.') }}"
