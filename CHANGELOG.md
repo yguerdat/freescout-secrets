@@ -4,6 +4,15 @@ All notable changes to this module are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.3] — 2026-07-12
+
+### Security
+- **Remove modulo bias from the passphrase generator.** The generated-passphrase
+  helper mapped a random byte onto the alphabet with `byte % length`, which
+  slightly over-represented the first characters and reduced entropy (CodeQL
+  `js/biased-cryptographic-random`). It now uses rejection sampling for a
+  uniform distribution.
+
 ## [1.1.2] — 2026-07-11
 
 ### Fixed

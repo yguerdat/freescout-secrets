@@ -27,11 +27,22 @@
 
     function randomPassphrase() {
         var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
-        var bytes = crypto.getRandomValues(new Uint8Array(20));
+        var n = alphabet.length;
+        // Rejection sampling: discard the biased tail so every character is
+        // equally likely (plain `byte % n` would over-represent the first
+        // 256 % n characters).
+        var max = 256 - (256 % n);
+        var chars = [];
+        var buf = new Uint8Array(1);
+        while (chars.length < 20) {
+            crypto.getRandomValues(buf);
+            if (buf[0] >= max) { continue; }
+            chars.push(alphabet[buf[0] % n]);
+        }
         var out = '';
-        for (var i = 0; i < bytes.length; i++) {
-            out += alphabet[bytes[i] % alphabet.length];
-            if (i % 4 === 3 && i < bytes.length - 1) { out += '-'; }
+        for (var i = 0; i < chars.length; i++) {
+            out += chars[i];
+            if (i % 4 === 3 && i < chars.length - 1) { out += '-'; }
         }
         return out;
     }
