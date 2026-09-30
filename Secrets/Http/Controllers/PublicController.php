@@ -26,15 +26,17 @@ class PublicController extends Controller
      | the recipient-facing reveal for outbound secrets).
      * ----------------------------------------------------------------- */
 
-    public function revealPage($token)
+    public function revealPage(Request $request, $token)
     {
+        $this->applyVisitorLocale($request);
+
         $id = $token;
         // The page only renders a shell; the ciphertext is fetched and decrypted
         // client-side. Validate the id shape to avoid pointless DB hits.
-        return view('secrets::public.reveal', [
+        return response()->view('secrets::public.reveal', [
             'id'         => $this->sanitizeId($id),
             'iterations' => (int) config('secrets.pbkdf2_iterations', 310000),
-        ]);
+        ])->header('Vary', 'Accept-Language');
     }
 
     public function peek($token)
@@ -86,15 +88,17 @@ class PublicController extends Controller
      | Inbound intake (customer -> agent)
      * ----------------------------------------------------------------- */
 
-    public function inboundForm()
+    public function inboundForm(Request $request)
     {
         if (!$this->service->inboundEnabled()) {
             abort(404);
         }
 
-        return view('secrets::public.inbound', [
+        $this->applyVisitorLocale($request);
+
+        return response()->view('secrets::public.inbound', [
             'iterations' => (int) config('secrets.pbkdf2_iterations', 310000),
-        ]);
+        ])->header('Vary', 'Accept-Language');
     }
 
     public function pubkey()
@@ -160,6 +164,41 @@ class PublicController extends Controller
     /* ----------------------------------------------------------------- *
      | Helpers
      * ----------------------------------------------------------------- */
+
+    /**
+     * Public visitors have no FreeScout account, so the Localize middleware
+     * leaves them on the app locale. Pick their language instead: an explicit
+     * ?lang= wins, then the browser's Accept-Language, limited to the locales
+     * enabled in FreeScout. Otherwise the app locale stays.
+     */
+    private function applyVisitorLocale(Request $request): void
+    {
+        $available = (array) config('app.locales', []);
+        if (!$available) {
+            return;
+        }
+
+        $candidates = array_merge(
+            [(string) $request->query('lang', '')],
+            $request->getLanguages() // e.g. ['de_CH', 'de', 'en_US', 'en']
+        );
+
+        foreach ($candidates as $candidate) {
+            $candidate = str_replace('_', '-', trim($candidate));
+            if ($candidate === '') {
+                continue;
+            }
+            // Exact match first (pt-BR), then the primary subtag (de-CH -> de).
+            foreach ([$candidate, explode('-', $candidate)[0]] as $try) {
+                foreach ($available as $locale) {
+                    if (strcasecmp($locale, $try) === 0) {
+                        \Helper::setLocale($locale);
+                        return;
+                    }
+                }
+            }
+        }
+    }
 
     private function sanitizeId($id): string
     {

@@ -4,6 +4,19 @@ All notable changes to this module are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.4] — 2026-09-30
+
+### Fixed
+- **Public pages are now translatable** ([#6](https://github.com/yguerdat/freescout-secrets/issues/6)).
+  The module shipped an empty `en.json`, so FreeScout's translation interface
+  had no English baseline for the module's strings and could hide them
+  (notably the public reveal page and intake form). `en.json` now lists every
+  string.
+- **Public pages follow the visitor's language.** Customers aren't logged in,
+  so the pages always rendered in the app's default language. They now use
+  `?lang=xx` if given, otherwise the browser's `Accept-Language`, limited to
+  the languages enabled in FreeScout (falling back to the app language).
+
 ## [1.1.3] — 2026-07-12
 
 ### Security
