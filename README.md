@@ -45,9 +45,9 @@ A **dedicated sub-domain** for the public pages (e.g. `secrets.example.com`) is 
 
 ## Installation
 
-1. Copy the `Secrets` folder into your FreeScout `Modules/` directory:
+1. Download `Secrets.zip` from the [latest release](https://github.com/yguerdat/freescout-secrets/releases/latest) and extract it into your FreeScout `Modules/` directory:
    ```bash
-   cp -r Secrets /path/to/freescout/Modules/
+   unzip Secrets.zip -d /path/to/freescout/Modules/
    ```
 2. Run the migration and build the assets:
    ```bash
@@ -57,6 +57,8 @@ A **dedicated sub-domain** for the public pages (e.g. `secrets.example.com`) is 
    ```
 3. Go to **Manage → Modules** and activate **Secrets**.
 4. Open **Manage → Secrets** and set the **public base URL**, default expiry/views, the intake mailbox and (optionally) your SMSeagle credentials.
+
+**Updating** — use **Update now** in **Manage → Modules**: it installs the latest release. (Upgrading from 1.1.4 or earlier needs one manual update, see the [CHANGELOG](CHANGELOG.md).)
 
 ## Usage
 
