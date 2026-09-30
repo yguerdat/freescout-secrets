@@ -4,6 +4,23 @@ All notable changes to this module are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/), and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## [1.1.5] — 2026-09-30
+
+### Fixed
+- **In-app update ("Update now") now works.** It pointed at GitHub's source
+  archive, which unpacks to `freescout-secrets-main/Secrets/`, so FreeScout
+  left the installed module untouched (and a stray `freescout-secrets-main`
+  folder in `Modules/`) while reporting success. Updates now download
+  `Secrets.zip` from the latest GitHub release, whose root is `Secrets/`.
+
+### Upgrading from 1.1.4 or earlier
+Installed copies still carry the old download URL, so update **once by hand**:
+download `Secrets.zip` from the
+[latest release](https://github.com/yguerdat/freescout-secrets/releases/latest),
+extract it into `Modules/` (replacing `Secrets/`), delete
+`Modules/freescout-secrets-main` if present, then run
+`php artisan freescout:module-install secrets`. Later updates work from the UI.
+
 ## [1.1.4] — 2026-09-30
 
 ### Fixed
