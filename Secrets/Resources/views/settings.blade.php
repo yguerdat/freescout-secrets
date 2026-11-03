@@ -9,7 +9,7 @@
 @section('content')
 <div class="section-heading">{{ __('Secrets') }}</div>
 
-<div class="col-xs-12">
+<div class="col-xs-12 secrets-backoffice">
     <p class="text-help">{{ __('Securely share one-time secrets with customers and let them send secrets back to you. Everything is end-to-end encrypted in the browser.') }}</p>
 
     <form method="POST" action="{{ route('secrets.settings') }}" class="form-horizontal margin-top">

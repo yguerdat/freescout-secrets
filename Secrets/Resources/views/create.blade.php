@@ -11,7 +11,7 @@
     <i class="glyphicon glyphicon-lock"></i> {{ __('Send a secret') }}
 </div>
 
-<div class="col-xs-12">
+<div class="col-xs-12 secrets-backoffice">
     <p class="text-help">{{ __('Paste a password or configuration below. It is encrypted in your browser; the server only ever stores an unreadable blob, and the key travels only inside the link. Send the link to your customer.') }}</p>
 
     <div id="secrets-create-app"
