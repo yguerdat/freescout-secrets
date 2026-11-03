@@ -9,7 +9,7 @@
 @section('content')
 <div class="section-heading">{{ __('Sent secrets') }}</div>
 
-<div class="col-xs-12">
+<div class="col-xs-12 secrets-backoffice">
     <p class="text-help">{{ __('Audit of secrets created here. Outbound secrets are zero-knowledge — their content and link cannot be recovered, only revoked. Revoking destroys the payload immediately.') }}</p>
 
     @if($secrets->count() == 0)
